@@ -16,6 +16,8 @@ class _HomeState extends State<Home> {
  String carta = "https://www.deckofcardsapi.com/static/img/back.png";
  String? codCarta;
  int pontos = 0;
+ String perdeu = "Não ultrapasse 21";
+
 
 
   _drawCard() async {
@@ -191,12 +193,20 @@ class _HomeState extends State<Home> {
     }
 
     setState(() {
-      carta = "$novaCarta";
+      carta = novaCarta;
       codCarta = novoNaipe;
     });
+
+    if(pontos>21){
+      setState(() {
+        perdeu = "Você estourou!";
+      });
+    }
   }
 
-  _shuffle() async {
+  _restart() async {
+
+    // Ebaralhar - otimização pendente
     String url = "https://www.deckofcardsapi.com/api/deck/mvxknn3ro4x5/shuffle/?deck_count=1";
 
     http.Response response;
@@ -205,9 +215,16 @@ class _HomeState extends State<Home> {
 
     final Map<String, dynamic> retorno = json.decode(response.body);
 
-    //otimizar
+    // verso carta
+
+    setState(() {
+      carta = "https://www.deckofcardsapi.com/static/img/back.png";
+      pontos = 0;
+      perdeu = "Não ultrapasse 21";
+    });
 
   }
+
 
 
 
@@ -229,15 +246,19 @@ class _HomeState extends State<Home> {
           backgroundColor: Colors.yellowAccent
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+        padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
            children: <Widget>[
-              Image.network(
-                  "$carta"
-              ),
+             Container(
+              height: 400,
+               width: 200,
+               child: Image.network(
+                   carta
+               ),
+             ),
               Text(
-                  "Código da carta: $codCarta",
+                  perdeu,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.kanit(
                     textStyle: TextStyle(
@@ -260,7 +281,7 @@ class _HomeState extends State<Home> {
                   height: 50.0,
                   child: ElevatedButton(
                     onPressed: _drawCard,
-                    child: Text('Draw' ,
+                    child: Text('Puxar carta' ,
                         style: GoogleFonts.kanit(
                           textStyle: TextStyle(
                             fontSize: 25,
@@ -276,8 +297,8 @@ class _HomeState extends State<Home> {
                child: SizedBox(
                  height: 50.0,
                  child: ElevatedButton(
-                   onPressed: _shuffle,
-                   child: Text('Embaralhar' ,
+                   onPressed: _restart,
+                   child: Text('Reiniciar' ,
                        style: GoogleFonts.kanit(
                          textStyle: TextStyle(
                            fontSize: 25,
